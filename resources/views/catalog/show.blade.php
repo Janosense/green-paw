@@ -129,9 +129,29 @@
                         </span>
                     </div>
                 @endif
-                <button class="btn btn-primary" style="width: 100%;">
-                    {{ ($course->price && $course->price > 0) ? 'Enroll Now' : 'Start Learning' }}
-                </button>
+                @auth
+                    @if(auth()->user()->isEnrolledIn($course))
+                        @php $nextLesson = $course->lessons->first(fn($l) => !auth()->user()->hasCompletedLesson($l)); @endphp
+                        @if($nextLesson)
+                            <a href="{{ route('learn.lesson', [$course, $nextLesson]) }}" class="btn btn-primary" style="width: 100%;">
+                                Continue Learning
+                            </a>
+                        @else
+                            <a href="{{ route('learn.my-courses') }}" class="btn btn-primary" style="width: 100%;">
+                                ✓ Enrolled — Go to My Courses
+                            </a>
+                        @endif
+                    @else
+                        <form method="POST" action="{{ route('learn.enroll', $course) }}">
+                            @csrf
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                {{ ($course->price && $course->price > 0) ? 'Enroll Now' : 'Start Learning — Free' }}
+                            </button>
+                        </form>
+                    @endif
+                @else
+                    <a href="{{ route('login') }}" class="btn btn-primary" style="width: 100%;">Log in to Enroll</a>
+                @endauth
             </div>
         </div>
     </div>

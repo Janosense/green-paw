@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         // Seed roles and permissions first
         $this->call(RolesAndPermissionsSeeder::class);
         $this->call(CategoriesSeeder::class);
+        $this->call(BadgesSeeder::class);
 
         // Create super-admin user
         $admin = User::factory()->create([

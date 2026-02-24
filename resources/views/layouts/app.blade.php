@@ -722,6 +722,34 @@
                 @endif
 
                 <div class="nav-section">
+                    <div class="nav-section-title">Learning</div>
+                    <a href="{{ route('learn.my-courses') }}"
+                        class="nav-link {{ request()->routeIs('learn.my-courses') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342" />
+                        </svg>
+                        My Courses
+                    </a>
+                    <a href="{{ route('gamification.leaderboard') }}"
+                        class="nav-link {{ request()->routeIs('gamification.leaderboard') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 10h4v11H3zM10 3h4v18h-4zM17 7h4v14h-4z" />
+                        </svg>
+                        Leaderboard
+                    </a>
+                    <a href="{{ route('gamification.badges') }}"
+                        class="nav-link {{ request()->routeIs('gamification.badges') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                        Badges
+                    </a>
+                </div>
+
+                <div class="nav-section">
                     <div class="nav-section-title">Browse</div>
                     <a href="{{ route('catalog.index') }}"
                         class="nav-link {{ request()->routeIs('catalog.*') ? 'active' : '' }}">
@@ -730,6 +758,14 @@
                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                         </svg>
                         Course Catalog
+                    </a>
+                    <a href="{{ route('paths.index') }}"
+                        class="nav-link {{ request()->routeIs('paths.*') ? 'active' : '' }}">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                        </svg>
+                        Learning Paths
                     </a>
                 </div>
 

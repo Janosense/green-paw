@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -15,11 +16,6 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, HasRoles;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -33,21 +29,8 @@ class User extends Authenticatable
         'timezone',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -57,11 +40,87 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the tenant that the user belongs to.
-     */
     public function tenant(): BelongsTo
     {
         return $this->belongsTo(Tenant::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Learning Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+
+    public function completedLessons(): HasMany
+    {
+        return $this->hasMany(LessonCompletion::class);
+    }
+
+    public function points(): HasMany
+    {
+        return $this->hasMany(UserPoint::class);
+    }
+
+    public function badges(): BelongsToMany
+    {
+        return $this->belongsToMany(Badge::class, 'user_badges')->withPivot('earned_at');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Gamification Helpers
+    |--------------------------------------------------------------------------
+    */
+
+    public function totalPoints(): int
+    {
+        return (int) $this->points()->sum('points');
+    }
+
+    public function currentStreak(): int
+    {
+        $dates = $this->completedLessons()
+            ->selectRaw('DATE(completed_at) as day')
+            ->groupBy('day')
+            ->orderByDesc('day')
+            ->pluck('day');
+
+        if ($dates->isEmpty())
+            return 0;
+
+        $streak = 0;
+        $expected = now()->startOfDay();
+
+        foreach ($dates as $date) {
+            $d = \Carbon\Carbon::parse($date)->startOfDay();
+            if ($d->eq($expected) || $d->eq($expected->copy()->subDay())) {
+                $streak++;
+                $expected = $d;
+            } else {
+                break;
+            }
+        }
+
+        return $streak;
+    }
+
+    public function isEnrolledIn(Course $course): bool
+    {
+        return $this->enrollments()->where('course_id', $course->id)->where('status', '!=', 'dropped')->exists();
+    }
+
+    public function enrollmentFor(Course $course): ?Enrollment
+    {
+        return $this->enrollments()->where('course_id', $course->id)->first();
+    }
+
+    public function hasCompletedLesson(Lesson $lesson): bool
+    {
+        return $this->completedLessons()->where('lesson_id', $lesson->id)->exists();
     }
 }
