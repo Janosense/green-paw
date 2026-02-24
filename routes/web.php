@@ -1,9 +1,15 @@
 <?php
 
+use App\Http\Controllers\Admin\AnalyticsController;
+use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\GradingController;
+use App\Http\Controllers\Admin\LiveSessionController;
 use App\Http\Controllers\Admin\LearningPathController;
 use App\Http\Controllers\Admin\LessonController;
+use App\Http\Controllers\Admin\QuestionBankController;
+use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserImportController;
@@ -11,11 +17,15 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CatalogController;
+use App\Http\Controllers\DiscussionController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\GamificationController;
 use App\Http\Controllers\LearningPathBrowseController;
 use App\Http\Controllers\LessonViewController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuizTakeController;
+use App\Http\Controllers\StudentProgressController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -87,6 +97,31 @@ Route::middleware('auth')->group(function () {
     Route::get('/leaderboard', [GamificationController::class, 'leaderboard'])->name('gamification.leaderboard');
     Route::get('/badges', [GamificationController::class, 'badges'])->name('gamification.badges');
 
+    // Student Progress
+    Route::get('/progress', [StudentProgressController::class, 'index'])->name('progress.index');
+
+    // Discussions
+    Route::get('/courses/{course}/discussions', [DiscussionController::class, 'index'])->name('discussions.index');
+    Route::post('/courses/{course}/discussions', [DiscussionController::class, 'store'])->name('discussions.store');
+    Route::get('/courses/{course}/discussions/{discussion}', [DiscussionController::class, 'show'])->name('discussions.show');
+    Route::post('/discussions/{discussion}/reply', [DiscussionController::class, 'reply'])->name('discussions.reply');
+    Route::post('/discussions/{discussion}/pin', [DiscussionController::class, 'togglePin'])->name('discussions.pin')->middleware('role:super-admin|admin|instructor');
+    Route::post('/discussions/{discussion}/lock', [DiscussionController::class, 'toggleLock'])->name('discussions.lock')->middleware('role:super-admin|admin|instructor');
+
+    // Direct Messages
+    Route::get('/messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::get('/messages/{user}', [MessageController::class, 'conversation'])->name('messages.conversation');
+    Route::post('/messages/{user}', [MessageController::class, 'send'])->name('messages.send');
+
+    // Announcements Feed
+    Route::get('/announcements', [AnnouncementController::class, 'feed'])->name('announcements.feed');
+
+    // Quiz Taking
+    Route::post('/quiz/{quiz}/start', [QuizTakeController::class, 'start'])->name('quiz.start');
+    Route::get('/quiz/attempt/{attempt}', [QuizTakeController::class, 'take'])->name('quiz.take');
+    Route::post('/quiz/attempt/{attempt}/submit', [QuizTakeController::class, 'submit'])->name('quiz.submit');
+    Route::get('/quiz/attempt/{attempt}/results', [QuizTakeController::class, 'results'])->name('quiz.results');
+
     /*
     |--------------------------------------------------------------------------
     | Admin Routes
@@ -105,11 +140,33 @@ Route::middleware('auth')->group(function () {
         Route::resource('courses.lessons', LessonController::class)->except(['index', 'show']);
         Route::post('courses/{course}/lessons/reorder', [LessonController::class, 'reorder'])->name('courses.lessons.reorder');
 
+        // Quizzes (nested under courses)
+        Route::resource('courses.quizzes', QuizController::class)->except(['show']);
+
         // Categories
         Route::resource('categories', CategoryController::class)->except(['show']);
 
         // Learning Paths
         Route::resource('learning-paths', LearningPathController::class)->except(['show']);
+
+        // Question Banks
+        Route::resource('question-banks', QuestionBankController::class)->except(['show']);
+
+        // Grading
+        Route::get('grading', [GradingController::class, 'index'])->name('grading.index');
+        Route::post('grading/{attempt}', [GradingController::class, 'grade'])->name('grading.grade');
+
+        // Analytics
+        Route::get('analytics', [AnalyticsController::class, 'dashboard'])->name('analytics.dashboard');
+        Route::get('analytics/course/{course}', [AnalyticsController::class, 'course'])->name('analytics.course');
+        Route::get('analytics/gradebook/{course}', [AnalyticsController::class, 'gradeBook'])->name('analytics.gradebook');
+        Route::get('analytics/export/{type}', [AnalyticsController::class, 'export'])->name('analytics.export');
+
+        // Announcements
+        Route::resource('announcements', AnnouncementController::class)->except(['show']);
+
+        // Live Sessions (nested under courses)
+        Route::resource('courses.live-sessions', LiveSessionController::class)->except(['show']);
     });
 
     Route::prefix('admin')->name('admin.')->middleware('role:super-admin|admin')->group(function () {

@@ -164,6 +164,24 @@
                 </div>
             </div>
 
+            <!-- Quizzes -->
+            <div class="card" style="margin-bottom: 16px;">
+                <div class="card-header">
+                    <h3 class="card-title">Quizzes ({{ $course->quizzes->count() }})</h3>
+                    <a href="{{ route('admin.courses.quizzes.index', $course) }}" class="btn btn-primary btn-sm">
+                        Manage
+                    </a>
+                </div>
+                <div class="card-body" style="padding: 12px 16px; font-size: 13px; color: var(--text-muted);">
+                    @if($course->quizzes->count())
+                        {{ $course->quizzes->where('is_published', true)->count() }} published,
+                        {{ $course->quizzes->where('is_published', false)->count() }} draft
+                    @else
+                        No quizzes yet. Click "Manage" to create one.
+                    @endif
+                </div>
+            </div>
+
             <!-- Danger zone -->
             <div class="card" style="border-color: rgba(239, 68, 68, 0.2);">
                 <div class="card-header">
